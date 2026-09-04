@@ -1,23 +1,10 @@
 import { IInputs, IOutputs } from "./generated/ManifestTypes";
-import { HoverOptionSetComponent, IHoverOptionSetProps } from "./HoverOptionSet"; 
+import { HoverOptionSetComponent, IHoverOptionSetProps } from "./HoverOptionSet";
 import * as React from "react";
 
 export class PCFHoverOptionSet implements ComponentFramework.ReactControl<IInputs, IOutputs> {
     private notifyOutputChanged: () => void;
-    private _selectedValue: number;
-    private _options: ComponentFramework.PropertyHelper.OptionMetadata[];
-    private _isDarkMode: boolean;
-    private _formFactor: number;
-    private _isDisabled: boolean;
-
-    constructor() { 
-        this._selectedValue = 0;
-        this._options = [];
-        this._isDarkMode = false;
-        this._formFactor = 0; 
-        this._isDisabled = false;
-
-    }
+    private _selectedValue: number | null = null;
 
     public init(
         context: ComponentFramework.Context<IInputs>,
@@ -25,48 +12,52 @@ export class PCFHoverOptionSet implements ComponentFramework.ReactControl<IInput
         state: ComponentFramework.Dictionary
     ): void {
         this.notifyOutputChanged = notifyOutputChanged;
-        this._updateContextValues(context);
-
-        const optionsetFieldControl = context.parameters.optionsetFieldControl;
-        this._selectedValue = optionsetFieldControl.raw || 0; 
-        this._options = optionsetFieldControl.attributes?.Options || [];
+        this._selectedValue = context.parameters.optionsetFieldControl.raw ?? null;
     }
 
     public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
-        this._updateContextValues(context);
+        const optionSet = context.parameters.optionsetFieldControl;
+
+        // Always take the current value and option list from the context rather than
+        // caching them in init(), so changes made outside the control (form scripts,
+        // business rules, record navigation) are reflected immediately.
+        this._selectedValue = optionSet.raw ?? null;
 
         const props: IHoverOptionSetProps = {
             selectedValue: this._selectedValue,
-            options: this._options,
+            options: optionSet.attributes?.Options ?? [],
             onChange: this._updateValue.bind(this),
-            isDarkMode: this._isDarkMode,
-            formFactor: this._formFactor,
-            disabled: this._isDisabled
+            isDarkMode: context.fluentDesignLanguage?.isDarkTheme ?? false,
+            formFactor: context.client.getFormFactor(),
+            disabled: context.mode.isControlDisabled,
+            allowClear: context.parameters.allowClear?.raw ?? true,
+            useOptionColors: context.parameters.useOptionColors?.raw ?? true,
         };
 
         return React.createElement(HoverOptionSetComponent, props);
     }
 
-    private _updateContextValues(context: ComponentFramework.Context<IInputs>): void {
-        this._isDarkMode = context.fluentDesignLanguage?.isDarkTheme ?? false;
-        this._formFactor = context.client.getFormFactor();
-        this._isDisabled = context.mode.isControlDisabled;
-    }
-    
-    private _updateValue(newValue: number | undefined): void {
-        if (newValue !== undefined) {
-            this._selectedValue = newValue;
-            this.notifyOutputChanged();
+    private _updateValue(newValue: number | null): void {
+        if (newValue === this._selectedValue) {
+            return;
         }
+        this._selectedValue = newValue;
+        this.notifyOutputChanged();
     }
 
     public getOutputs(): IOutputs {
-        return { 
-            optionsetFieldControl: this._selectedValue
+        // The platform only clears a bound column when the output is explicitly null;
+        // returning undefined leaves the existing value untouched. The generated
+        // IOutputs type declares the property as an optional number, so the null has
+        // to be cast to satisfy the compiler.
+        return {
+            optionsetFieldControl: this._selectedValue === null
+                ? (null as unknown as number)
+                : this._selectedValue
         };
     }
 
     public destroy(): void {
-        // Cleanup if necessary
+        // Nothing to clean up; React unmounts the virtual control tree.
     }
 }

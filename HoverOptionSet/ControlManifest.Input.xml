@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="nunosubtil" constructor="PCFHoverOptionSet" version="0.0.1" display-name-key="PCFHoverOptionSet" description-key="PCFHoverOptionSet description" control-type="virtual">
+  <control namespace="nunosubtil" constructor="PCFHoverOptionSet" version="1.1.5" display-name-key="PCFHoverOptionSet" description-key="PCFHoverOptionSet description" control-type="virtual">
     <external-service-usage enabled="false">
     </external-service-usage>
     <property name="optionsetFieldControl" display-name-key="Option Set" description-key="Specifies the column that this property is bound to." of-type="OptionSet" usage="bound" required="true" />
+    <property name="allowClear" display-name-key="Allow clear" description-key="When enabled, clicking the selected option again clears the value." of-type="TwoOptions" usage="input" required="false" default-value="true" />
+    <property name="useOptionColors" display-name-key="Use option colors" description-key="When enabled, options that have a color defined in the column metadata are rendered with that color. Options without a color fall back to the default theme." of-type="TwoOptions" usage="input" required="false" default-value="true" />
     <resources>
       <code path="index.ts" order="1"/>
       <platform-library name="React" version="16.8.6" />
-      <platform-library name="Fluent" version="8.29.0" />
     </resources>
   </control>
 </manifest>

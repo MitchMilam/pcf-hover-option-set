@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="nunosubtil" constructor="PCFHoverOptionSet" version="1.1.5" display-name-key="PCFHoverOptionSet" description-key="PCFHoverOptionSet description" control-type="virtual">
+  <control namespace="nunosubtil" constructor="PCFHoverOptionSet" version="1.1.6" display-name-key="PCFHoverOptionSet" description-key="PCFHoverOptionSet description" control-type="virtual">
     <external-service-usage enabled="false">
     </external-service-usage>
     <property name="optionsetFieldControl" display-name-key="Option Set" description-key="Specifies the column that this property is bound to." of-type="OptionSet" usage="bound" required="true" />

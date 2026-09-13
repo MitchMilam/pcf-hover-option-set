@@ -36,14 +36,25 @@ export const darkTheme: IThemePalette = {
 
 export const getTheme = (isDarkMode: boolean): IThemePalette => (isDarkMode ? darkTheme : lightTheme);
 
-// Horizontal room for the hover zoom and focus ring on the first/last pill in a row;
-// without it the host container clips them at the edge.
-const HOVER_SCALE_GUTTER = '6px';
+// Room for the hover zoom and focus ring around the pills; without it the host
+// container clips them at the edge of the control.
+const HORIZONTAL_GUTTER = 6;
+const VERTICAL_GUTTER = 2;
+
+// A pill plus its vertical gutters has to add up to the height of a stock form
+// field (32px), otherwise the platform's label sits higher than the pill text and
+// the field lines up with neither the row above it nor the row below.
+const CHOICE_HEIGHT = 32 - VERTICAL_GUTTER * 2;
+
+// Gap between pills: wide enough between columns to read as separate options,
+// tighter between rows when the options wrap.
+const CHOICE_ROW_GAP = 4;
+const CHOICE_COLUMN_GAP = 10;
 
 export const HOVER_SCALE = 1.06;
 
 export const containerStyle = (theme: IThemePalette, isMobile: boolean, disabled: boolean): React.CSSProperties => ({
-  padding: isMobile ? '5px' : `2px ${HOVER_SCALE_GUTTER}`,
+  padding: `${VERTICAL_GUTTER}px ${isMobile ? VERTICAL_GUTTER : HORIZONTAL_GUTTER}px`,
   overflow: 'visible',
   backgroundColor: theme.containerBackground,
   boxSizing: 'border-box',
@@ -56,13 +67,13 @@ export const choicesStyle = (isMobile: boolean): React.CSSProperties => ({
   flexDirection: isMobile ? 'column' : 'row',
   flexWrap: 'wrap',
   justifyContent: 'flex-start',
+  gap: `${CHOICE_ROW_GAP}px ${CHOICE_COLUMN_GAP}px`,
   width: '100%',
 });
 
 export const choiceBaseStyle: React.CSSProperties = {
-  margin: '5px',
   padding: '5px 10px',
-  height: '30px',
+  height: `${CHOICE_HEIGHT}px`,
   borderRadius: '6px',
   display: 'flex',
   alignItems: 'center',

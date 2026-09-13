@@ -58,6 +58,29 @@
     <ProjectReference Include="..\pcf-hover-option-set.pcfproj" />
   </ItemGroup>
 
+  <!--
+    Copies the packaged zips to versioned filenames, so a build meant for one
+    environment can't be mistaken for another. The version comes from
+    Solution.xml rather than the Version property above, because Solution.xml is
+    what the packager itself stamps into the solution.
+  -->
+  <Target Name="CopyVersionedSolutionZips" AfterTargets="Build">
+    <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)$(SolutionRootPath)\Other\Solution.xml"
+             Query="/ImportExportXml/SolutionManifest/Version/text()">
+      <Output TaskParameter="Result" ItemName="SolutionManifestVersion" />
+    </XmlPeek>
+    <PropertyGroup>
+      <VersionedZipStem>$(OutputPath)$(MSBuildProjectName)_@(SolutionManifestVersion)</VersionedZipStem>
+    </PropertyGroup>
+    <Copy SourceFiles="$(OutputPath)$(MSBuildProjectName).zip"
+          DestinationFiles="$(VersionedZipStem).zip"
+          Condition="Exists('$(OutputPath)$(MSBuildProjectName).zip')" />
+    <Copy SourceFiles="$(OutputPath)$(MSBuildProjectName)_managed.zip"
+          DestinationFiles="$(VersionedZipStem)_managed.zip"
+          Condition="Exists('$(OutputPath)$(MSBuildProjectName)_managed.zip')" />
+    <Message Importance="high" Text="Versioned solution zips: $(VersionedZipStem)[_managed].zip" />
+  </Target>
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Solution.targets" Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Solution.targets')" />
 
